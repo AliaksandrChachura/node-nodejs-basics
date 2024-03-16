@@ -1,17 +1,16 @@
 const parseArgs = () => {
     const args = process.argv.slice(2);
+    console.log(args);
 
-    if (args.length % 2 !== 0) {
-        console.error('Invalid number of command line arguments. Each property must have a corresponding value.');
-        return;
-    }
-
-    for (let i = 0; i < args.length; i += 2) {
-        const propName = args[i].replace(/^--/, '');
-        const propValue = args[i + 1];
-
-        console.log(`${propName} is ${propValue}`);
-    }
+    const result = args.reduce((sum, curr, i, arr) => {
+        if (curr.startsWith("--")) {
+          return sum + `${curr.slice(2)} is ${arr[i + 1]}, `;
+        }
+    
+        return sum + "";
+      }, "");
+    
+      console.log(result.slice(0, result.length - 2));
 };
 
 parseArgs();

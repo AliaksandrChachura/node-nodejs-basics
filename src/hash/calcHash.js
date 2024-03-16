@@ -1,28 +1,31 @@
-import fs from 'fs/promises';
-import path from 'path';
+import * as fs from 'fs/promises';
+import * as crypto from "node:crypto";
+import { Transform } from "node:stream";
+import {createReadStream} from "node:fs";
+import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const calculateHash = async () => {
-    const __filename = fileURLToPath(import.meta.url);
-	const __dirname = path.dirname(__filename);
+    const dataStream = createReadStream(resolve(__dirname, "files", "fileToCalculateHashFor.txt"));
+    const hashSum = crypto.createHash("sha256");
 
-	const folderPath = path.join(__dirname, 'files');
-	const filePath = path.join(folderPath, 'fileToCalculateHashFor.txt');
+    const hashStream = new Transform({
+        transform(chunk, encoding, callback) {
+            console.log(chunk);
+            hashSum.update(chunk);
+            callback(null);
+        },
+        flush(callback) {
+            const hex = hashSum.digest("hex");
+            console.log(hex);
+            callback(null, hex);
+        }
+    });
 
-    try {
-        const data = await fs.readFile(filePath);
-
-        const { createHash } = await import('node:crypto');
-        const hash = createHash('sha256');
-
-        hash.update(data);
-
-        const hashResult = hash.digest('hex');
-
-        console.log('Hash of the file:', hashResult);
-    } catch (error) {
-        console.error('Error reading or hashing the file:', error);
-    }
+  dataStream.pipe(hashStream).pipe(process.stdout);
 };
 
 await calculateHash();
