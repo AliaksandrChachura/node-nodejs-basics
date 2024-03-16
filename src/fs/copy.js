@@ -1,38 +1,34 @@
-import fs from 'node:fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import * as fs from 'node:fs/promises';
+import {dirname, resolve} from "node:path";
+import { fileURLToPath } from 'node:url';
 
 const copy = async () => {
+    const __filename = fileURLToPath(import.meta.url);
+	const __dirname = dirname(__filename);
+
     const sourceFolder = 'files';
     const destinationFolder = 'files_copy';
 
-    const __filename = fileURLToPath(import.meta.url);
-	const __dirname = path.dirname(__filename);
-
-	const sourceFolderPath = path.join(__dirname, sourceFolder);
-    const destinationFolderPath = path.join(__dirname, destinationFolder);
-
     try {
-        await fs.stat(sourceFolderPath);
-    } catch (error) {
-        throw new Error('FS operation failed');
-    }
-
-    try {
-        await fs.mkdir(destinationFolderPath);
-    } catch (error) {
-        throw new Error('FS operation failed');
-    }
-
-    const files = await fs.readdir(sourceFolderPath);
-
+        const files = await fs.readdir(resolve(__dirname, sourceFolder));
+        await fs.mkdir(resolve(__dirname, destinationFolder), {
+          recursive: false
+        });
     
-    files.forEach((file) => {
-        const srcPath = path.join(sourceFolderPath, file);
-        const destPath = path.join(destinationFolderPath, file);
-
-        fs.copyFile(srcPath, destPath);
-    });
+        const copyPromises = files.map(file =>
+          fs.copyFile(
+            resolve(__dirname, "files", `${file}`),
+            resolve(__dirname, "files_copy", `${file}`),
+            fs.constants.COPYFILE_EXCL
+          )
+        );
+    
+        await Promise.all(copyPromises);
+    
+        console.log("Files successfully copied");
+      } catch (e) {
+        throw new Error("FS operation failed");
+      }
 };
 
 await copy();
