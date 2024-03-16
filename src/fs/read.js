@@ -1,26 +1,27 @@
-import fs from 'node:fs/promises';
-import path from 'path';
+import * as fs from 'node:fs/promises';
+import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const readFilePath = resolve(__dirname, sourceFolder, readFile);
+
+const sourceFolder = 'files';
+const readFile = 'fileToRead.txt';
+
 const read = async () => {
-    const sourceFolder = 'files';
-    const readFile = 'fileToRead.txt';
-
-    const __filename = fileURLToPath(import.meta.url);
-	const __dirname = path.dirname(__filename);
-
-    const readFilePath = path.join(__dirname, sourceFolder, readFile);
+    
 
     try {
         await fs.access(readFilePath);
-        const contents = await fs.readFile(readFilePath, { encoding: 'utf8' });
+        const contents = await fs.readFile(
+            readFilePath,
+            { encoding: 'utf8' }
+        );
         console.log(contents);
     } catch (error) {
-        if (error.code === 'ENOENT') {
-            throw new Error('FS operation failed');
-        } else {
-            throw new Error(`FS operation failed: ${error.message}`);
-        }
+        throw new Error(`FS operation failed: ${error.message}`);
     }
 };
 
