@@ -1,4 +1,4 @@
-import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
+import { Worker } from 'worker_threads';
 import { cpus } from 'node:os';
 import {fileURLToPath} from "url";
 import { dirname, resolve } from "path";
@@ -26,7 +26,7 @@ const createWorker = async (workerData) => {
 const createWorkers = async (numWorkers) => {
   const workers = [];
   for (let i = 0; i < numWorkers; i++) {
-    const data = 10 + i;
+    const data = FIRST_ARG + i;
     const result = await createWorker(data);
     workers.push(result);
   }
@@ -34,13 +34,20 @@ const createWorkers = async (numWorkers) => {
 };
 
 const performCalculations = async () => {
-  console.log(await createWorkers(numCores));
-    if (isMainThread) {
-        const numCores = cpus().length;
-        const workers = await createWorkers(numCores);
-    
-        console.log(workers);
-    }
+  const numCores = cpus().length;
+  const workers = await createWorkers(numCores);
+
+  Promise.allSettled(workers)
+    .then(result => {
+      return result.map(item => {
+        if (item.status === "fulfilled") {
+          return {status: "resolved", data: item.value};
+        } else {
+          return {status: "error", data: null};
+        }
+      });
+    })
+    .then(res => console.log(res));
 };
 
 await performCalculations();
