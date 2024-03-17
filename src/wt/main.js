@@ -1,11 +1,24 @@
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import { cpus } from 'node:os';
+import {fileURLToPath} from "url";
+import { dirname, resolve } from "path";
 
-const createWorker = (data) => {
-  return new Promise((resolve) => {
-    const worker = new Worker('./wt/worker.js', { workerData: data });
+const FIRST_ARG = 10;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const createWorker = async (workerData) => {
+  return new Promise((res, rej) => {
+    const worker = new Worker(resolve(__dirname, "worker.js"), { workerData });
     worker.on('message', (result) => {
-      resolve(result);
+      res(result);
+    });
+    worker.on("error", rej);
+    worker.on("exit", code => {
+      if (code !== 0) {
+        rej(new Error(`stopped with ${code} exit code`));
+      }
     });
   });
 };
@@ -21,6 +34,7 @@ const createWorkers = async (numWorkers) => {
 };
 
 const performCalculations = async () => {
+  console.log(await createWorkers(numCores));
     if (isMainThread) {
         const numCores = cpus().length;
         const workers = await createWorkers(numCores);

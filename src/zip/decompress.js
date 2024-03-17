@@ -1,41 +1,26 @@
-import { gunzip } from 'node:zlib';
-import {
-    readFile,
-    writeFile,
-} from 'node:fs';
-import path from 'path';
+import{
+    createReadStream,
+    createWriteStream
+} from "fs";
+import { createGunzip } from 'node:zlib';
+import { rm } from "fs/promises";
+import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
+
+
 
 const decompress = async () => {
     const __filename = fileURLToPath(import.meta.url);
-	const __dirname = path.dirname(__filename);
-    
+    const __dirname = dirname(__filename);
     const sourceFolder = 'files';
-    const folderPath = path.join(__dirname, sourceFolder);
-    
-    const compressedFilePath = path.join(folderPath, 'archive.gz');
-    const decompressedFilePath = path.join(folderPath, 'fileToCompress.txt');
+    const folderPath = resolve(__dirname, sourceFolder);
 
-    readFile(compressedFilePath, (err, compressedData) => {
-        if (err) {
-            console.error(`Error reading compressed file "archive.gz": ${err}`);
-            return;
-        }
-    
-        gunzip(compressedData, (err, decompressedData) => {
-            if (err) {
-                console.error(`Error decompressing data: ${err}`);
-                return;
-            }
-    
-            writeFile(decompressedFilePath, decompressedData.toString('base64'), (err) => {
-                if (err) {
-                    console.error(`Error writing decompressed file fileToCompress.txt: ${err}`);
-                    return;
-                }
-                console.log(`File "archive.gz" decompressed and saved as "fileToCompress.txt"`);
-            });
-        });
+    createReadStream(resolve(folderPath, "archive.gz"))
+        .pipe(createGunzip())
+        .pipe(createWriteStream(resolve(folderPath, "fileToCompress.txt")))
+        .on("finish", async () => {
+            await rm(resolve(folderPath, `archive.gz`));
+            console.log("Decompression done!");
     });
 };
 
