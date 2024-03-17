@@ -5,18 +5,18 @@ import {
     createWriteStream,
 } from 'node:fs';
 import { rm } from 'node:fs/promises';
-import path from 'path';
+import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const compress = async () => {
     const __filename = fileURLToPath(import.meta.url);
-	const __dirname = path.dirname(__filename);
+	const __dirname = dirname(__filename);
     
     const sourceFolder = 'files';
-    const folderPath = path.join(__dirname, sourceFolder);
+    const folderPath = resolve(__dirname, sourceFolder);
     
-    const decompressedFilePath = path.join(folderPath, 'fileToCompress.txt');
-    const compressedFilePath = path.join(folderPath, 'archive.gz');
+    const decompressedFilePath = resolve(folderPath, 'fileToCompress.txt');
+    const compressedFilePath = resolve(folderPath, 'archive.gz');
 
     const gzip = createGzip();
     const source = createReadStream(decompressedFilePath);

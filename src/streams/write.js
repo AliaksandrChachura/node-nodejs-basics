@@ -1,27 +1,21 @@
-import fs from 'node:fs/promises';
-import path from 'path';
+import { createWriteStream } from "fs";
+import { dirname, resolve} from 'path';
 import { fileURLToPath } from 'url';
-import process from 'node:process';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const write = async () => {
-    const sourceFolder = 'files';
-    const fileToWrite = 'fileToWrite.txt';
-
-    const __filename = fileURLToPath(import.meta.url);
-	const __dirname = path.dirname(__filename);
-
-	const folderPath = path.join(__dirname, sourceFolder);
-	const filePath = path.join(folderPath, fileToWrite);
-
-    const fileHandle = await fs.open('fileToWrite.txt', 'w');
-
-    process.stdin.on('data', async (chunk) => {
-        await fileHandle.write(chunk);
-    });
-
-    process.stdin.on('end', async () => {
-        await fileHandle.close();
-        console.log('Writing to file completed.');
+    const writable = createWriteStream(
+        resolve(__dirname, "files", "fileToWrite.txt"),
+        { flags: "a" }
+    );
+    process.stdout.write("Enter data:\n");
+    process.stdin.on("data", (data) => {
+        writable.write(data);
+        process.stdout.write(
+        "Data saved to filetowrite.txt\nYou can enter some more data:\n"
+        );
     });
 };
 
