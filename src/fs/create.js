@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import { appendFile } from 'node:fs/promises';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from "url";
 
@@ -7,7 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const create = async () => {
 
 	try {
-		await fs.appendFile(
+		await appendFile(
 				resolve(__dirname, "files", "fresh.txt"),
 				"I am fresh and young",
 				{
