@@ -26,7 +26,7 @@ const copy = async () => {
         await Promise.all(copyPromises);
     
         console.log("Files successfully copied");
-      } catch (e) {
+      } catch {
         throw new Error("FS operation failed");
       }
 };

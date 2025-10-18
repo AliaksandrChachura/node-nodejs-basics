@@ -15,7 +15,7 @@ const create = async () => {
 				}
 		);
 		console.log("File successfully created");
-	} catch (e) {
+	} catch {
 			throw new Error("FS operation failed");
 	}
 };

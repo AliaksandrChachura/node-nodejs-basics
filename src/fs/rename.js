@@ -1,4 +1,4 @@
-import * as fs from 'node:fs/promises';
+import { readdir, rename } from 'node:fs/promises';
 import { fileURLToPath } from 'url';
 import {dirname, resolve} from "path";
 
@@ -10,19 +10,19 @@ const destinationFile = 'properFilename.md';
 
 const rename = async () => {
     try {
-        const data = await fs.readdir(resolve(__dirname, sourceFolder));
+        const data = await readdir(resolve(__dirname, sourceFolder));
 
         if (data.includes(destinationFile)) {
             throw new Error("FS operation failed");
         }
 
-        await fs.rename(
+        await rename(
             resolve(__dirname, sourceFolder, sourceFile),
             resolve(__dirname, sourceFolder, destinationFile)
         );
 
         console.log("File successfully renamed");
-    } catch (e) {
+    } catch {
         throw new Error("FS operation failed");
     }
 };
