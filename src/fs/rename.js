@@ -1,4 +1,4 @@
-import { readdir, rename } from 'node:fs/promises';
+import { readdir, rename as fsRename } from 'node:fs/promises';
 import { fileURLToPath } from 'url';
 import {dirname, resolve} from "path";
 
@@ -16,7 +16,7 @@ const rename = async () => {
             throw new Error("FS operation failed");
         }
 
-        await rename(
+        await fsRename(
             resolve(__dirname, sourceFolder, sourceFile),
             resolve(__dirname, sourceFolder, destinationFile)
         );
