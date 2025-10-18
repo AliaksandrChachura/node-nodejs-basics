@@ -1,4 +1,4 @@
-import * as fs from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -13,7 +13,7 @@ const folderPath = resolve(__dirname, sourceFolder);
 const list = async () => {
 
     try {
-        const filenames = await fs.readdir(folderPath);
+        const filenames = await readdir(folderPath);
         console.log(filenames);
         
     } catch (error) {
