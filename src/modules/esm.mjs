@@ -3,7 +3,6 @@ import { release, version } from 'node:os';
 import { createServer } from 'http';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { log } from 'node:console';
 import('./files/c.js');
 
 const random = Math.random();
