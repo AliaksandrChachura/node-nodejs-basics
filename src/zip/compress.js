@@ -4,6 +4,7 @@ import {
     createWriteStream,
 } from 'node:fs';
 import { rm } from 'node:fs/promises';
+import { pipeline } from 'node:stream/promises';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -14,13 +15,25 @@ const sourceFolder = 'files';
 const folderPath = resolve(__dirname, sourceFolder);
 
 const compress = async () => {
-    createReadStream(resolve(folderPath, "fileToCompress.txt"))
-        .pipe(createGzip())
-        .pipe(createWriteStream(resolve(folderPath, "archive.gz")))
-        .on("finish", async () => {
-        await rm(resolve(folderPath, `fileToCompress.txt`));
-        console.log("Compression done!");
-    }); 
+    const source = resolve(folderPath, "fileToCompress.txt");
+    const destination = resolve(folderPath, "archive.gz");
+    try {
+         await pipeline(
+            createReadStream(source, { flag: 'r' }),
+            createGzip(),
+            createWriteStream(destination /* , { flag: 'wx' } */)
+        );
+
+        await rm(source);
+    } catch (err) {
+        if (err.code === "EEXIST") {
+            console.error('The file already exists');
+        } else if (err.code === "ENOENT") {
+            console.error('The file does not exist');
+        } else {
+            throw err;
+        }
+    }
 };
 
 await compress();
