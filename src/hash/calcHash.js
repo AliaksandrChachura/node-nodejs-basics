@@ -1,31 +1,25 @@
-import * as fs from 'fs/promises';
-import * as crypto from "node:crypto";
-import { Transform } from "node:stream";
-import {createReadStream} from "node:fs";
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { createHash } from "node:crypto";
+import { createReadStream } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const calculateHash = async () => {
-    const dataStream = createReadStream(resolve(__dirname, "files", "fileToCalculateHashFor.txt"));
-    const hashSum = crypto.createHash("sha256");
+  const filePath = resolve(__dirname, "files", "fileToCalculateHashFor.txt");
+  const hash = createHash("sha256");
+  const stream = createReadStream(filePath);
 
-    const hashStream = new Transform({
-        transform(chunk, encoding, callback) {
-            console.log(chunk);
-            hashSum.update(chunk);
-            callback(null);
-        },
-        flush(callback) {
-            const hex = hashSum.digest("hex");
-            console.log(hex);
-            callback(null, hex);
-        }
+  return new Promise((resolve, reject) => {
+    stream.on("data", chunk => hash.update(chunk));
+    stream.on("end", () => {
+      const result = hash.digest("hex");
+      console.log("SHA256 Hash:", result);
+      resolve(result);
     });
-
-  dataStream.pipe(hashStream).pipe(process.stdout);
+    stream.on("error", reject);
+  });
 };
 
 await calculateHash();
