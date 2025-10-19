@@ -12,7 +12,7 @@ const createWorker = async (workerData) => {
   return new Promise((res, rej) => {
     const worker = new Worker(resolve(__dirname, "worker.js"), { workerData });
     worker.on('message', (result) => {
-      res(result);
+      res(result)
     });
     worker.on("error", rej);
     worker.on("exit", code => {
